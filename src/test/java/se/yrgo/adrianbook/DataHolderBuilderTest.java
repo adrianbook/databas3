@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-class DataRetrievingObjectTest {
+class DataHolderBuilderTest {
 	
 	private DataHolderBuilder dataHolderBuilder;
 	private DataHolderBuilder dataHolder2;
 	
 	private int rowLength = 3;
 	
-	private void loadDataHolderRowWithNdataPoints(int numberOfDataPoints) throws DataHolderException {
+	private void loadDataHolderRowWithNdataPoints(int numberOfDataPoints) throws DataHolderBuilderException {
 		for(int i = 0; i < numberOfDataPoints; i++) {
 			int random = ThreadLocalRandom.current().nextInt(100);
-			dataHolderBuilder.loadInt(i+1, random+i);
+			dataHolderBuilder.loadData(i+1, random+i);
 		}
 	}
 	
@@ -43,23 +43,23 @@ class DataRetrievingObjectTest {
 	}
 	
 	@Test
-	void loadAndRetrieveSingleDataPoint() throws DataHolderException {
-		dataHolderBuilder.loadString(1, "test1");
+	void loadAndRetrieveSingleDataPoint() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, "test1");
 		String[] result = dataHolderBuilder.getCopyOfCurrentRow();
 		assertEquals("test1", result[0]);
 	}
 	
 	@Test
-	void loadIntegerAndReturnAsString() throws DataHolderException {
-		dataHolderBuilder.loadInt(1, 22);
+	void loadIntegerAndReturnAsString() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, 22);
 		String[] result = dataHolderBuilder.getCopyOfCurrentRow();
 		assertEquals("22", result[0]);
 	}
 	
 	@Test
-	void loadMultipleDataPoints() throws DataHolderException {
-		dataHolderBuilder.loadInt(1, 33);
-		dataHolderBuilder.loadString(2,"hej");
+	void loadMultipleDataPoints() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, 33);
+		dataHolderBuilder.loadData(2,"hej");
 		
 		String[] results = dataHolderBuilder.getCopyOfCurrentRow();
 		String result1 = results[0];
@@ -78,16 +78,16 @@ class DataRetrievingObjectTest {
 	
 
 	@Test
-	void saveFullRows() throws DataHolderException {
-		dataHolderBuilder.loadString(1,"a");
-		dataHolderBuilder.loadString(2,"b");
-		dataHolderBuilder.loadString(3,"c");
+	void saveFullRows() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1,"a");
+		dataHolderBuilder.loadData(2,"b");
+		dataHolderBuilder.loadData(3,"c");
 		
 		String firstRow = "a, b, c";
 		
-		dataHolderBuilder.loadInt(1,1);
-		dataHolderBuilder.loadInt(2,2);
-		dataHolderBuilder.loadInt(3,3);
+		dataHolderBuilder.loadData(1,1);
+		dataHolderBuilder.loadData(2,2);
+		dataHolderBuilder.loadData(3,3);
 		
 		String secondRow = "1, 2, 3";
 		
@@ -97,10 +97,20 @@ class DataRetrievingObjectTest {
 		assertEquals(secondRow, dataHolderBuilder.getStoredRowToString(1));
 	}
 	
-
+	@Test
+	void saveUncompletedRowsIfPrompted() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, "hej");
+		dataHolderBuilder.loadData(3, "hopp");
+		
+		dataHolderBuilder.storeActiveRow();
+		
+		String result = dataHolderBuilder.getStoredRowToString(0);
+		
+		assertEquals("hej, , hopp", result);
+	}
 	
 	@Test
-	void newRowsAddedToDataTable() throws DataHolderException {
+	void newRowsAddedToDataTable() throws DataHolderBuilderException {
 		loadDataHolderRowWithNdataPoints(rowLength);
 		assertEquals(1, dataHolderBuilder.getCopyOfDataTable().size());
 		
@@ -116,9 +126,9 @@ class DataRetrievingObjectTest {
 	
 	
 	@Test
-	void loadDataWithSpecifiedIndex() throws DataHolderException {
-		dataHolderBuilder.loadString(1, "test");
-		dataHolderBuilder.loadInt(2, 3);
+	void loadDataWithSpecifiedIndex() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, "test");
+		dataHolderBuilder.loadData(2, 3);
 		
 		assertEquals("test", dataHolderBuilder.getCopyOfCurrentRow()[0]);
 		assertEquals("3", dataHolderBuilder.getCopyOfCurrentRow()[1]);
@@ -128,41 +138,41 @@ class DataRetrievingObjectTest {
 	void throwDataHolderExceptionIfIndexOutOfBounds() {
 		String message = "";
 		try {
-			dataHolderBuilder.loadString(5, "test");
+			dataHolderBuilder.loadData(5, "test");
 		}
-		catch (DataHolderException e) {
+		catch (DataHolderBuilderException e) {
 			message = e.getLocalizedMessage();
 		}
 		assertEquals("Given collumn number 5 is not in this DataHolder", message);
 	}
 	
 	@Test
-	void throwExceptionIfAttemptIsMadeToLoadSameIndexTwice() throws DataHolderException {
+	void throwExceptionIfAttemptIsMadeToLoadSameIndexTwice() throws DataHolderBuilderException {
 		String message = "";
 		try {
-			dataHolderBuilder.loadString(1, "test");
-			dataHolderBuilder.loadString(2, "3");
-			dataHolderBuilder.loadString(2, "hej");
+			dataHolderBuilder.loadData(1, "test");
+			dataHolderBuilder.loadData(2, "3");
+			dataHolderBuilder.loadData(2, "hej");
 		}
-		catch (DataHolderException e) {
+		catch (DataHolderBuilderException e) {
 			message = e.getLocalizedMessage();
 		}
 		assertEquals("Same collumn can't be loaded twice. Collumn 2", message);
 	}
 	
 	@Test
-	void leadTwoParameterLoadFunctionsIntoDataTable() throws DataHolderException {
-		dataHolderBuilder.loadInt(1, 1);
-		dataHolderBuilder.loadString(2,"hej");
-		dataHolderBuilder.loadString(3,"hå");
+	void leadTwoParameterLoadFunctionsIntoDataTable() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, 1);
+		dataHolderBuilder.loadData(2,"hej");
+		dataHolderBuilder.loadData(3,"hå");
 		
 		assertEquals("1, hej, hå", dataHolderBuilder.getStoredRowToString(0));
 	}
 	
 	@Test
-	void loadDataWithSpecifiedCollumnName() throws DataHolderException {
-		dataHolderBuilder.loadString("Collumn 1", "test");
-		dataHolderBuilder.loadInt("Collumn 2", 3);
+	void loadDataWithSpecifiedCollumnName() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData("Collumn 1", "test");
+		dataHolderBuilder.loadData("Collumn 2", 3);
 		
 		assertEquals("test", dataHolderBuilder.getCopyOfCurrentRow()[0]);
 		assertEquals("3", dataHolderBuilder.getCopyOfCurrentRow()[1]);
@@ -170,8 +180,23 @@ class DataRetrievingObjectTest {
 	
 	@Test
 	void throwDataHolderExceptionIfCollumnNameNonsense() {
-		assertThrows(DataHolderException.class, ()-> {
-			dataHolderBuilder.loadInt("bajs",3);
+		assertThrows(DataHolderBuilderException.class, ()-> {
+			dataHolderBuilder.loadData("bajs",3);
 		});
 	}
+	
+	@Test
+	void makeDataHolder() throws DataHolderBuilderException {
+		dataHolderBuilder.loadData(1, "hej");
+		dataHolderBuilder.loadData(2, "då");
+		dataHolderBuilder.loadData(3, "aj");
+		
+		loadDataHolderRowWithNdataPoints(rowLength);
+		DataHolder dh = dataHolderBuilder.createDataHolder();
+		String result = dh.getDataTable().get(0).toString();
+		
+		assertEquals("[hej, då, aj]", result);
+	}
+	
+		
 }

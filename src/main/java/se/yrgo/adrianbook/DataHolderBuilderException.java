@@ -1,18 +1,18 @@
 package se.yrgo.adrianbook;
 
-public class DataHolderException extends Exception {
+public class DataHolderBuilderException extends Exception {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public DataHolderException() {
+	public DataHolderBuilderException() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public DataHolderException(String message) {
+	public DataHolderBuilderException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}

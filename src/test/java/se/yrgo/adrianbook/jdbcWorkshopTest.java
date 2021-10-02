@@ -125,5 +125,12 @@ class jdbcWorkshopTest {
 		System.out.println(s);
 	}
 	
+	@Test
+	void testList() {
+		String a = "10";
+		String b = "2";
+		System.out.println("JÄMFÖR  "+a.compareTo(b));
+	}
+	
 	
 }

@@ -3,29 +3,75 @@ package se.yrgo.adrianbook;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 public class DataHolderBuilder {
 	
 	private String[] activeRow;
 	private List<List<String>> dataTable;
-	private int[] longestEntryLengthPerCollumn;
 	private String[] collumnHeaders;
 	private final int rowLength;
-
 	
 	public DataHolderBuilder(String[] collumnHeaders) {
 		super();
 		this.rowLength = collumnHeaders.length;
 		this.activeRow = new String[rowLength];
 		this.dataTable = new ArrayList<>();
-		this.longestEntryLengthPerCollumn = new int[rowLength];
-		Arrays.fill(longestEntryLengthPerCollumn, 0);
 		this.collumnHeaders = collumnHeaders;
 	}
 	
+	public void loadData(int collumnNumber, int dataInt) throws DataHolderBuilderException {
+		loadData(collumnNumber, Integer.toString(dataInt));
+	}
+	
+	public void loadData(int collumnNumber, String dataString) throws DataHolderBuilderException {
+		checkDataForCleanlinessAndLoadIt(collumnNumber-1, dataString);
+	}
+	
+	public void loadData(String collumnName, int dataInt) throws DataHolderBuilderException {
+		loadData(collumnName, Integer.toString(dataInt));
+	}
 		
+	public void loadData(String collumnName, String dataString) throws DataHolderBuilderException {
+		int index = getIndexForCollumnName(collumnName);
+		checkDataForCleanlinessAndLoadIt(index, dataString);
+	}
+	
+	private int getIndexForCollumnName(String collumnName) throws DataHolderBuilderException {
+		for (int i = 0; i < rowLength; i++) {
+			if (collumnHeaders[i].equals(collumnName)) {
+				return i;
+			}
+		}
+		throw new DataHolderBuilderException(String.format("Unknown collumn name: %s", collumnName));
+	}
+	
+	private void checkDataForCleanlinessAndLoadIt(int index, String dataString) throws DataHolderBuilderException {
+		checkRowIndex(index);
+		addDataToActiveRowAndStoreRowIfFull(index, dataString);
+	}
+
+	private void checkRowIndex(int index) throws DataHolderBuilderException {
+		try {
+			checkIfGivenCollumnIndexAllreadyLoaded(index);			
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new DataHolderBuilderException(String.format("Given collumn number %d is not in this DataHolder", index+1));
+		}
+	}
+
+	private void addDataToActiveRowAndStoreRowIfFull(int index, String dataString) {
+		activeRow[index] = dataString;
+		if (!Arrays.asList(activeRow).contains(null)) {
+			loadFullRowIntoTable();
+		}
+	}
+	
+	private void checkIfGivenCollumnIndexAllreadyLoaded(int index) throws DataHolderBuilderException {
+		if (activeRow[index] != null) {
+			throw new DataHolderBuilderException(String.format("Same collumn can't be loaded twice. Collumn %d", index+1));
+		}
+	}
+	
 	private void loadFullRowIntoTable() {
 		List<String> rowToStore = List.of(activeRow);
 		activeRow = new String[rowLength];
@@ -77,61 +123,21 @@ public class DataHolderBuilder {
 		return builder.toString();
 	}
 
-	public int getLongestEntryLengthForCollumn(int collumnNumber) {
-		return longestEntryLengthPerCollumn[collumnNumber];
-	}
-
 	public String[] getCopyOfCollumns() {
 		return collumnHeaders.clone();
 	}
-
-	public void addCollumnHeaders(String... collumnHeaders) {
-		this.collumnHeaders = collumnHeaders;
-	}
-
-	public void loadString(int collumnNumber, String dataString) throws DataHolderException {
-			checkDataForCleanlinessAndLoadIt(collumnNumber-1, dataString);
-	}
-
-	public void loadInt(int collumnNumber, int dataInt) throws DataHolderException {
-			checkDataForCleanlinessAndLoadIt(collumnNumber-1, Integer.toString(dataInt));
-	}
 	
-	private void checkDataForCleanlinessAndLoadIt(int index, String dataString) throws DataHolderException {
-		try {
-			checkIfGivenCollumnIndexHolds(index);			
-		} catch (ArrayIndexOutOfBoundsException e) {
-			throw new DataHolderException(String.format("Given collumn number %d is not in this DataHolder", index+1));
-		}
-		activeRow[index] = dataString;
-		if (!Arrays.asList(activeRow).contains(null)) {
-			loadFullRowIntoTable();
-		}
+	public DataHolder createDataHolder() {
+		return new DataHolder(this.dataTable, this.collumnHeaders);
 	}
 
-	private void checkIfGivenCollumnIndexHolds(int index) throws DataHolderException {
-		if (activeRow[index] != null) {
-			throw new DataHolderException(String.format("Same collumn can't be loaded twice. Collumn %d", index+1));
-		}
-	}
-
-	public void loadString(String collumnName, String dataString) throws DataHolderException {
-		checkCollumnNameValidityAndPassOn(collumnName, dataString);		
-	}
-
-	private void checkCollumnNameValidityAndPassOn(String collumnName, String dataString) throws DataHolderException {
-		for (int i = 0; i < rowLength; i++) {
-			if (collumnHeaders[i].equals(collumnName)) {
-				checkDataForCleanlinessAndLoadIt(i, dataString);
-				return;
+	public void storeActiveRow() {
+		for(int i = 0; i < rowLength; i++) {
+			if(activeRow[i] == null) {
+				activeRow[i] = "";
 			}
 		}
-		throw new DataHolderException(String.format("Unknown collumn name: %s", collumnName));
+		loadFullRowIntoTable();
 	}
-
-	public void loadInt(String collumnName, int dataInt) throws DataHolderException {
-		checkCollumnNameValidityAndPassOn(collumnName, Integer.toString(dataInt));
-	}
-
 
 }
