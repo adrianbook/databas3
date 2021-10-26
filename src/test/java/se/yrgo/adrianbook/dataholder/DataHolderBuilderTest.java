@@ -1,4 +1,4 @@
-package se.yrgo.adrianbook;
+package se.yrgo.adrianbook.dataholder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import se.yrgo.adrianbook.dataholder.DataHolder;
+import se.yrgo.adrianbook.exceptions.DataHolderException;
+
 class DataHolderBuilderTest {
 	
 	private DataHolderBuilder dataHolderBuilder;
@@ -19,7 +22,7 @@ class DataHolderBuilderTest {
 	
 	private int rowLength = 3;
 	
-	private void loadDataHolderRowWithNdataPoints(int numberOfDataPoints) throws DataHolderBuilderException {
+	private void loadDataHolderRowWithNdataPoints(int numberOfDataPoints) throws DataHolderException {
 		for(int i = 0; i < numberOfDataPoints; i++) {
 			int random = ThreadLocalRandom.current().nextInt(100);
 			dataHolderBuilder.loadData(i+1, random+i);
@@ -28,7 +31,7 @@ class DataHolderBuilderTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		dataHolderBuilder	= DataHolderFactory.instantiateWithGeneratedCollumnNames(rowLength);
+		dataHolderBuilder	= DataHolderBuilderFactory.instantiateWithGeneratedColumnNames(rowLength);
 	}
 
 	@AfterEach
@@ -43,21 +46,21 @@ class DataHolderBuilderTest {
 	}
 	
 	@Test
-	void loadAndRetrieveSingleDataPoint() throws DataHolderBuilderException {
+	void loadAndRetrieveSingleDataPoint() throws DataHolderException {
 		dataHolderBuilder.loadData(1, "test1");
 		String[] result = dataHolderBuilder.getCopyOfCurrentRow();
 		assertEquals("test1", result[0]);
 	}
 	
 	@Test
-	void loadIntegerAndReturnAsString() throws DataHolderBuilderException {
+	void loadIntegerAndReturnAsString() throws DataHolderException {
 		dataHolderBuilder.loadData(1, 22);
 		String[] result = dataHolderBuilder.getCopyOfCurrentRow();
 		assertEquals("22", result[0]);
 	}
 	
 	@Test
-	void loadMultipleDataPoints() throws DataHolderBuilderException {
+	void loadMultipleDataPoints() throws DataHolderException {
 		dataHolderBuilder.loadData(1, 33);
 		dataHolderBuilder.loadData(2,"hej");
 		
@@ -78,7 +81,7 @@ class DataHolderBuilderTest {
 	
 
 	@Test
-	void saveFullRows() throws DataHolderBuilderException {
+	void saveFullRows() throws DataHolderException {
 		dataHolderBuilder.loadData(1,"a");
 		dataHolderBuilder.loadData(2,"b");
 		dataHolderBuilder.loadData(3,"c");
@@ -98,7 +101,7 @@ class DataHolderBuilderTest {
 	}
 	
 	@Test
-	void saveUncompletedRowsIfPrompted() throws DataHolderBuilderException {
+	void saveUncompletedRowsIfPrompted() throws DataHolderException {
 		dataHolderBuilder.loadData(1, "hej");
 		dataHolderBuilder.loadData(3, "hopp");
 		
@@ -110,7 +113,7 @@ class DataHolderBuilderTest {
 	}
 	
 	@Test
-	void newRowsAddedToDataTable() throws DataHolderBuilderException {
+	void newRowsAddedToDataTable() throws DataHolderException {
 		loadDataHolderRowWithNdataPoints(rowLength);
 		assertEquals(1, dataHolderBuilder.getCopyOfDataTable().size());
 		
@@ -120,13 +123,13 @@ class DataHolderBuilderTest {
 	}
 	
 	@Test
-	void storeCollumnNamesSeperately() {
-		assertEquals("Collumn 1", dataHolderBuilder.getCopyOfCollumns()[0]);
+	void storeColumnNamesSeperately() {
+		assertEquals("Column 1", dataHolderBuilder.getCopyOfColumnHeaders()[0]);
 	}
 	
 	
 	@Test
-	void loadDataWithSpecifiedIndex() throws DataHolderBuilderException {
+	void loadDataWithSpecifiedIndex() throws DataHolderException {
 		dataHolderBuilder.loadData(1, "test");
 		dataHolderBuilder.loadData(2, 3);
 		
@@ -140,28 +143,28 @@ class DataHolderBuilderTest {
 		try {
 			dataHolderBuilder.loadData(5, "test");
 		}
-		catch (DataHolderBuilderException e) {
+		catch (DataHolderException e) {
 			message = e.getLocalizedMessage();
 		}
-		assertEquals("Given collumn number 5 is not in this DataHolder", message);
+		assertEquals("Given column number 5 is not in this DataHolder", message);
 	}
 	
 	@Test
-	void throwExceptionIfAttemptIsMadeToLoadSameIndexTwice() throws DataHolderBuilderException {
+	void throwExceptionIfAttemptIsMadeToLoadSameIndexTwice() throws DataHolderException {
 		String message = "";
 		try {
 			dataHolderBuilder.loadData(1, "test");
 			dataHolderBuilder.loadData(2, "3");
 			dataHolderBuilder.loadData(2, "hej");
 		}
-		catch (DataHolderBuilderException e) {
+		catch (DataHolderException e) {
 			message = e.getLocalizedMessage();
 		}
-		assertEquals("Same collumn can't be loaded twice. Collumn 2", message);
+		assertEquals("Same column can't be loaded twice. Column 2", message);
 	}
 	
 	@Test
-	void leadTwoParameterLoadFunctionsIntoDataTable() throws DataHolderBuilderException {
+	void leadTwoParameterLoadFunctionsIntoDataTable() throws DataHolderException {
 		dataHolderBuilder.loadData(1, 1);
 		dataHolderBuilder.loadData(2,"hej");
 		dataHolderBuilder.loadData(3,"hå");
@@ -170,32 +173,32 @@ class DataHolderBuilderTest {
 	}
 	
 	@Test
-	void loadDataWithSpecifiedCollumnName() throws DataHolderBuilderException {
-		dataHolderBuilder.loadData("Collumn 1", "test");
-		dataHolderBuilder.loadData("Collumn 2", 3);
+	void loadDataWithSpecifiedColumnName() throws DataHolderException {
+		dataHolderBuilder.loadData("Column 1", "test");
+		dataHolderBuilder.loadData("Column 2", 3);
 		
 		assertEquals("test", dataHolderBuilder.getCopyOfCurrentRow()[0]);
 		assertEquals("3", dataHolderBuilder.getCopyOfCurrentRow()[1]);
 	}
 	
 	@Test
-	void throwDataHolderExceptionIfCollumnNameNonsense() {
-		assertThrows(DataHolderBuilderException.class, ()-> {
+	void throwDataHolderExceptionIfColumnNameNonsense() {
+		assertThrows(DataHolderException.class, ()-> {
 			dataHolderBuilder.loadData("bajs",3);
 		});
 	}
 	
 	@Test
-	void makeDataHolder() throws DataHolderBuilderException {
+	void makeDataHolder() throws DataHolderException {
 		dataHolderBuilder.loadData(1, "hej");
 		dataHolderBuilder.loadData(2, "då");
 		dataHolderBuilder.loadData(3, "aj");
 		
 		loadDataHolderRowWithNdataPoints(rowLength);
 		DataHolder dh = dataHolderBuilder.createDataHolder();
-		String result = dh.getDataTable().get(0).toString();
+		String result = dh.getRowToString(0);
 		
-		assertEquals("[hej, då, aj]", result);
+		assertEquals("|hej       |då        |aj        |\n", result);
 	}
 	
 		

@@ -6,26 +6,46 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import se.yrgo.adrianbook.DbCall;
+import se.yrgo.adrianbook.databasecalls.DbCall;
+import se.yrgo.adrianbook.dataholder.DataHolder;
+import se.yrgo.adrianbook.dataholder.DataHolderBuilderFactory;
+import se.yrgo.adrianbook.exceptions.DataHolderException;
 
 public class DatabaseCallImplementationDummy implements DbCall {
 	
-	public String getBooks() {
-		return "books gotten";
+	public DataHolder getBooks() {
+		try {
+			return DataHolderBuilderFactory
+					.instantiateWithColumnNames("Books", "Gotten")
+					.loadData(1, "book1")
+					.loadData(2, "book2")
+					.createDataHolder();
+		} catch (DataHolderException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public String makeLoan(int i, int j) {
-		return String.format("values is ok %d %d", i, j);
+	public DataHolder makeLoan(int i, int j) {
+		DataHolder dh = DataHolderBuilderFactory
+				.instantiateWithGeneratedColumnNames(i+j)
+				.createDataHolder();
+		
+		return dh;
 	}
 
 	@Override
-	public String returnLoan() {
-		return "returned";
+	public DataHolder returnLoan(int i) {
+		return DataHolderBuilderFactory
+				.instantiateWithColumnNames("Loan Returned")
+				.createDataHolder();
 	}
 
 	@Override
-	public String getBooksForLender(int i) {
-		return "lenderId "+i;
+	public DataHolder getBooksForBorrower(int i) {
+		return DataHolderBuilderFactory
+				.instantiateWithGeneratedColumnNames(i)
+				.createDataHolder();
 	}
 }

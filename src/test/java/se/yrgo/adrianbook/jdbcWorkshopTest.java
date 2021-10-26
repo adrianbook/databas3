@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-
+@Disabled
 class jdbcWorkshopTest {
 	
 	boolean testBool;
@@ -131,6 +131,5 @@ class jdbcWorkshopTest {
 		String b = "2";
 		System.out.println("JÄMFÖR  "+a.compareTo(b));
 	}
-	
 	
 }

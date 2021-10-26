@@ -2,48 +2,63 @@ package se.yrgo.adrianbook;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+import se.yrgo.adrianbook.databasecalls.DbCall;
+import se.yrgo.adrianbook.databasecalls.DbCallImplementation;
+import se.yrgo.adrianbook.dataholder.DataHolder;
 import se.yrgo.adrianbook.dummies.DatabaseCallImplementationDummy;
+import se.yrgo.adrianbook.exceptions.DataHolderException;
+
 
 class AppTest {
 	
-	private static DbCall db;
-	private static String user;
-	private static String password;
+	private DbCall db;
+	private static final String USERNAME = "LibraryApp";
+	private static final String PASSWORD = "Analphab3tic";
+	private static final String DB = "AdrianBook";
 	 
-	@BeforeAll
-	private static void buildTestObjects() {
+	AppTest() {
 		db = new DatabaseCallImplementationDummy();
 	}
 
 	@Test
-	void testQueryBooks() {		
-		String controllString = "books gotten";
-		String testString = db.getBooks();
-		assertEquals(controllString, testString);
+	void testQueryBooks() throws DataHolderException {		
+		DataHolder holder = db.getBooks();
+		assertEquals(1, holder.getDataTable().size());
 	}
 	
 	@Test
-	void testQueryLender() {	
-		String controllString = "values is ok 2 4";
-		String testString = db.makeLoan(2, 4);
-		assertEquals(controllString, testString);
+	@Order(1)
+	void testQueryLender() throws Exception {
+		db= new DbCallImplementation(DB, USERNAME, PASSWORD);
+		String controllString = "Loan executed\n";
+		DataHolder holder = db.makeLoan(5, 1);
+		System.out.println(holder);
+		assertEquals(controllString, holder.toString());
 	}
 	
 	@Test
-	void testReturnBook() {
-		String controllString = "returned";
-		String testString = db.returnLoan();
-		assertEquals(controllString, testString);
+	@Order(2)
+	void testReturnBook() throws Exception {
+		db= new DbCallImplementation(DB, USERNAME, PASSWORD);
+		String controllString = "Return executed\n";
+		DataHolder holder = db.returnLoan(5);
+		System.out.println(holder);
+		assertEquals(controllString, holder.toString());
 	}
 	
 	@Test
-	void testListBooksByLender() {
-		String controllString = "lenderId 1";
-		String testString = db.getBooksForLender(1);	
-		assertEquals(controllString, testString);
+	void testListBooksByLender() throws Exception {
+		db= new DbCallImplementation(DB, USERNAME, PASSWORD);
+		String controllString = "Return executed\n";
+		DataHolder holder = db.getBooksForBorrower(2);
+		System.out.println(holder);
 	}
 
 }
