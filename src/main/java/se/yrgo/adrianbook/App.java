@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -44,7 +45,10 @@ public class App {
 			}
 			else if (flags.contains("u")) {
 				listLoansForBorrower();
-			}		
+			}
+			else {
+				printInstructions();
+			}
 		} catch (ArgumentParserException e) {
 			System.out.println(e.getLocalizedMessage());
 			printInstructions();
@@ -98,11 +102,11 @@ public class App {
 	private static void printInstructions() {
 		String usage = "\n\nUSAGE:\n\n"
 				+"java -jar libraryapp.jar + one of the options below\n\n"
-				+ "-l\tList available books. Supply option to sort books on"
+				+ "-l\t\t\tList available books. Supply option to sort books on"
 				+"<1> BookID <2> Title <3> Author <4> Genre\n"
-				+"-b <bookID> -u <userID>\tMake loan. You may supply multiple books, only execute loans for one borrower at a time\n"
-				+"-r <bookID>\tReturn book. You may return mutiple books at once.\n"
-				+"-u <userID>\tList loans for user. You may list loans for multiple borrowers.\n";
+				+"-b <bookID> -u <userID>\tMake loan. You may supply multiple books, but only execute loans for one borrower at a time\n"
+				+"-r <bookID>\t\tReturn book. You may return mutiple books at the same time.\n"
+				+"-u <userID>\t\tList loans for user. You may list loans for multiple borrowers.\n";
 		System.out.println(usage);	
 	}
 }
